@@ -6,4 +6,4 @@ anaconda下载链接： https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/An
 
 我的个人邮箱：xiaolh@jnu.edu.cn
 
- 暨大论文模板：https://github.com/JNUGroup/bachelor-thesis/
+ 暨大论文模板：(https://github.com/BatchClayderman/LaTeX4JNUBachelor

@@ -4,4 +4,5 @@
 
 anaconda下载链接： https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2020.11-Windows-x86_64.exe
 
+我的个人邮箱：xiaolh@jnu.edu.cn
  

@@ -9,7 +9,10 @@ anaconda下载链接： https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/An
 暨大论文模板：https://github.com/BatchClayderman/LaTeX4JNUBachelor
 
 可用的数据集：
+
 o	https://archive.ics.uci.edu/datasets
+
 o	https://www.kaggle.com/datasets
+
 o	https://catalog.data.gov/dataset
 

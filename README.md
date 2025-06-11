@@ -21,6 +21,9 @@ o	https://catalog.data.gov/dataset
 
 GPT 1-4:
 https://www.mikecaptain.com/resources/pdf/GPT-1.pdf
+
 https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf
+
 https://arxiv.org/pdf/2005.14165
+
 https://arxiv.org/pdf/2303.08774

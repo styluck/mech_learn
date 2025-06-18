@@ -33,5 +33,7 @@ https://arxiv.org/pdf/2303.08774
 GAN:
 
 Slide: https://cs.stanford.edu/~amishkin/assets/slides/gans.pdf
+
 GAN paper: https://arxiv.org/pdf/1406.2661
+
 Cycle GAN paper: https://arxiv.org/pdf/1703.10593

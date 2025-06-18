@@ -29,3 +29,7 @@ https://cdn.openai.com/better-language-models/language_models_are_unsupervised_m
 https://arxiv.org/pdf/2005.14165
 
 https://arxiv.org/pdf/2303.08774
+
+GAN:
+
+https://cs.stanford.edu/~amishkin/assets/slides/gans.pdf

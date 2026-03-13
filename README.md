@@ -1,6 +1,6 @@
 邱锡鹏老师教材与课件下载链接：https://nndl.github.io/ 
 
-作业邮箱：mechlrn@163.com
+作业邮箱：mechlrn@163.com  作业上传格式为：学号+姓名+第几次作业
 
 我的个人邮箱：xiaolh@jnu.edu.cn
 

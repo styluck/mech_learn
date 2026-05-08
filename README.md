@@ -20,6 +20,7 @@ o	https://catalog.data.gov/dataset
 
 o https://huggingface.co/papers/trending
 
+o CVPR 2026 论文和开源项目合集(Papers with Code): https://github.com/amusi/cvpr2026-papers-with-code
 
 
 GPT 1-4:

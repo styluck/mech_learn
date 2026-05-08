@@ -18,6 +18,8 @@ o	https://www.kaggle.com/datasets
 
 o	https://catalog.data.gov/dataset
 
+o https://huggingface.co/papers/trending
+
 
 
 GPT 1-4:

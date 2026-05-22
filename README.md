@@ -10,7 +10,10 @@ anaconda下载链接： https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/An
 
 期末论文作业分组登记：https://docs.qq.com/sheet/DZWhSbGFUQVNORGJ2?tab=BB08J2
 
-LSTM生成藏头诗：https://developer.huawei.com/home/forum/hwc/thread-0287115528566883014-1-1.html
+LSTM生成藏头诗：
+
+  1. https://developer.huawei.com/home/forum/hwc/thread-0287115528566883014-1-1.html
+  2. https://zhuanlan.zhihu.com/p/448720592
 
 可用的数据集：
 

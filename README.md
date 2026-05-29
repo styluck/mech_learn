@@ -45,3 +45,5 @@ Slide: https://cs.stanford.edu/~amishkin/assets/slides/gans.pdf
 GAN paper: https://arxiv.org/pdf/1406.2661
 
 Cycle GAN paper: https://arxiv.org/pdf/1703.10593
+
+U-Net数据下载：https://jnueducn-my.sharepoint.com/:f:/g/personal/xiaolh_jnu_edu_cn/IgDSSmKaUKTHRLySJ7shYX6fAe3jtcpRhKZ687hZYdn2cLA?e=TgMQO2

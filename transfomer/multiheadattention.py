@@ -31,13 +31,18 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         x = tf.reshape(x, (batch_size, -1, self.num_heads, self.depth))
         return tf.transpose(x, perm=[0, 2, 1, 3])
 
-    def call(self, v, k, q, mask):
-        batch_size = tf.shape(q)[0]
+    def call(self, query, key=None, value=None, attention_mask=None):
+        if key is None:
+            key = query
+        if value is None:
+            value = key
+
+        batch_size = tf.shape(query)[0]
 
         # 分头前的前向网络，获取q、k、v语义
-        q = self.wq(q)  # (batch_size, seq_len, d_model)
-        k = self.wk(k)
-        v = self.wv(v)
+        q = self.wq(query)  # (batch_size, seq_len, d_model)
+        k = self.wk(key)
+        v = self.wv(value)
 
         # 分头
         q = self.split_heads(q, batch_size) # (batch_size, num_heads, seq_len_q, depth)
@@ -49,10 +54,10 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         # 通过缩放点积注意力层
         if self.att:
             scaled_attention, attention_weights = scale_self_attention(
-        q, k, v, mask)
+        q, k, v, attention_mask)
         else:
             scaled_attention, attention_weights = scale_self_attention1(
-        q, k, v, mask)
+        q, k, v, attention_mask)
             
         # 把多头维度后移
         scaled_attention = tf.transpose(scaled_attention, [0, 2, 1, 3]) # (batch_size, seq_len_v, num_heads, depth)
@@ -72,7 +77,7 @@ if __name__ == '__main__':
 # 测试Multi-Head Attention
     temp_mha = MultiHeadAttention(d_model=512, num_heads=8)
     y = tf.random.uniform((1, 60, 512))
-    output, att = temp_mha(y, k=y, q=y, mask=None)
+    output, att = temp_mha(y, key=y, value=y, attention_mask=None)
     print(output.shape, att.shape)
 
     

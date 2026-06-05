@@ -24,9 +24,14 @@ class EncoderLayer(tf.keras.layers.Layer):
         self.dropout1 = tf.keras.layers.Dropout(dropout_rate)
         self.dropout2 = tf.keras.layers.Dropout(dropout_rate)
 
-    def call(self, inputs, training, mask):
+    def call(self, inputs, training=False, attention_mask=None):
         # 多头注意力网络
-        att_output, _ = self.mha(inputs, inputs, inputs, mask)
+        att_output, _ = self.mha(
+            inputs,
+            key=inputs,
+            value=inputs,
+            attention_mask=attention_mask,
+        )
         att_output = self.dropout1(att_output, training=training)
         out1 = self.layernorm1(inputs + att_output)  # (batch_size, input_seq_len, d_model)
         # 前向网络
@@ -58,15 +63,19 @@ class Encoder(layers.Layer):
                             for _ in range(n_layers)]
 
         self.dropout = layers.Dropout(drop_rate)
-    def call(self, inputs, training, mask):
+    def call(self, inputs, training=False, attention_mask=None):
 
-        seq_len = inputs.shape[1]
+        seq_len = tf.shape(inputs)[1]
         word_emb = self.embedding(inputs)
         word_emb *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
         emb = word_emb + self.pos_embedding[:,:seq_len,:]
         x = self.dropout(emb, training=training)
         for i in range(self.n_layers):
-            x = self.encode_layer[i](x, training, mask)
+            x = self.encode_layer[i](
+                x,
+                training=training,
+                attention_mask=attention_mask,
+            )
 
         return x
 
@@ -88,14 +97,24 @@ class DecoderLayer(tf.keras.layers.Layer):
         self.dropout2 = layers.Dropout(drop_rate)
         self.dropout3 = layers.Dropout(drop_rate)
 
-    def call(self,inputs, encode_out, training, 
-             look_ahead_mask, padding_mask):
+    def call(self,inputs, encode_out, training=False,
+             look_ahead_mask=None, padding_mask=None):
         # masked muti-head attention
-        att1, att_weight1 = self.mha1(inputs, inputs, inputs, look_ahead_mask)
+        att1, att_weight1 = self.mha1(
+            inputs,
+            key=inputs,
+            value=inputs,
+            attention_mask=look_ahead_mask,
+        )
         att1 = self.dropout1(att1, training=training)
         out1 = self.layernorm1(inputs + att1)
         # muti-head attention
-        att2, att_weight2 = self.mha2(encode_out, encode_out, inputs, padding_mask)
+        att2, att_weight2 = self.mha2(
+            inputs,
+            key=encode_out,
+            value=encode_out,
+            attention_mask=padding_mask,
+        )
         att2 = self.dropout2(att2, training=training)
         out2 = self.layernorm2(out1 + att2)
 
@@ -123,8 +142,8 @@ class Decoder(layers.Layer):
 
         self.dropout = layers.Dropout(drop_rate)
 
-    def call(self, inputs, encoder_out,training,
-             look_ahead_mask, padding_mask):
+    def call(self, inputs, encoder_out, training=False,
+             look_ahead_mask=None, padding_mask=None):
 
         seq_len = tf.shape(inputs)[1]
         attention_weights = {}
@@ -136,9 +155,13 @@ class Decoder(layers.Layer):
 #         print('--------------------\n',h, h.shape)
         # 叠加解码层
         for i in range(self.n_layers):
-            h, att_w1, att_w2 = self.decoder_layers[i](h, encoder_out,
-                                                   training, look_ahead_mask,
-                                                   padding_mask)
+            h, att_w1, att_w2 = self.decoder_layers[i](
+                h,
+                encode_out=encoder_out,
+                training=training,
+                look_ahead_mask=look_ahead_mask,
+                padding_mask=padding_mask,
+            )
             attention_weights['decoder_layer{}_att_w1'.format(i+1)] = att_w1
             attention_weights['decoder_layer{}_att_w2'.format(i+1)] = att_w2
 

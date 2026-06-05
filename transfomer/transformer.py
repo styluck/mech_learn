@@ -24,13 +24,22 @@ class Transformer(tf.keras.Model):
                               target_vocab_size, max_seq_len, drop_rate)
 
         self.final_layer = tf.keras.layers.Dense(target_vocab_size)
-    def call(self, inputs, targets, training, encode_padding_mask, 
-            look_ahead_mask, decode_padding_mask):
+    def call(self, inputs, targets, training=False, encode_padding_mask=None,
+             look_ahead_mask=None, decode_padding_mask=None):
 
-        encode_out = self.encoder(inputs, training, encode_padding_mask)
+        encode_out = self.encoder(
+            inputs,
+            training=training,
+            attention_mask=encode_padding_mask,
+        )
         # print("encode_out", encode_out.shape)
-        decode_out, att_weights = self.decoder(targets, encode_out, training, 
-                                               look_ahead_mask, decode_padding_mask)
+        decode_out, att_weights = self.decoder(
+            targets,
+            encoder_out=encode_out,
+            training=training,
+            look_ahead_mask=look_ahead_mask,
+            padding_mask=decode_padding_mask,
+        )
         # print("decode_out", decode_out.shape)
         final_out = self.final_layer(decode_out)
 

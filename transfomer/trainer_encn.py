@@ -17,8 +17,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from transformer import Transformer
-from self_attention import create_mask
+try:
+    from .transformer import Transformer
+    from .self_attention import create_mask
+except ImportError:
+    from transformer import Transformer
+    from self_attention import create_mask
 
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
@@ -158,7 +162,8 @@ if __name__ == '__main__':
                     corpus.append([en_sent, ch_sent])
         return corpus
     
-    corpus = load_data('./cmn.txt')
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    corpus = load_data(os.path.join(script_dir, 'cmn.txt'))
     
     ### 分词
     corpus_format = []
@@ -259,7 +264,7 @@ if __name__ == '__main__':
                               max_seq_len, dropout_rate)
     build_transformer_variables(transformer, max_seq_len)
     
-    checkpoint_path = './checkpoint/train_ch'
+    checkpoint_path = os.path.join(script_dir, 'checkpoint', 'train_ch')
     ckpt = tf.train.Checkpoint(transformer=transformer,
                               optimizer=optimizer)
     # ckpt管理器

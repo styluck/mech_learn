@@ -7,7 +7,10 @@ Created on Tue May 28 15:25:46 2024
 import tensorflow as tf
 import tensorflow.keras.layers as layers
 import numpy as np
-from encoderdecoder import Encoder, Decoder
+try:
+    from .encoderdecoder import Encoder, Decoder
+except ImportError:
+    from encoderdecoder import Encoder, Decoder
 
 
 # 创建Transformer

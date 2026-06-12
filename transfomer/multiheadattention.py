@@ -6,7 +6,10 @@ Created on Tue May 28 15:51:58 2024
 """
 import numpy as np
 import tensorflow as tf
-from self_attention import scale_self_attention, scale_self_attention1
+try:
+    from .self_attention import scale_self_attention, scale_self_attention1
+except ImportError:
+    from self_attention import scale_self_attention, scale_self_attention1
 
 # 构造multi head attention层
 class MultiHeadAttention(tf.keras.layers.Layer):

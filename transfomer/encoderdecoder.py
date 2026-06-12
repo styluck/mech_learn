@@ -6,9 +6,13 @@ Created on Tue May 28 15:57:30 2024
 """
 import numpy as np
 import tensorflow as tf
-from multiheadattention import MultiHeadAttention
 import tensorflow.keras.layers as layers
-from self_attention import positional_encoding
+try:
+    from .multiheadattention import MultiHeadAttention
+    from .self_attention import positional_encoding
+except ImportError:
+    from multiheadattention import MultiHeadAttention
+    from self_attention import positional_encoding
 
 # 编码器层    
 class EncoderLayer(tf.keras.layers.Layer):
@@ -110,7 +114,7 @@ class DecoderLayer(tf.keras.layers.Layer):
         out1 = self.layernorm1(inputs + att1)
         # muti-head attention
         att2, att_weight2 = self.mha2(
-            inputs,
+            out1,
             key=encode_out,
             value=encode_out,
             attention_mask=padding_mask,
@@ -189,7 +193,10 @@ if __name__ == '__main__':
     # Encoder层测试
     sample_encoder_layer = EncoderLayer(d_model=512, n_heads=8, ddf=2048)
     sample_encoder_layer_output = sample_encoder_layer(
-    tf.random.uniform((64, 43, 512)), False, None)
+        tf.random.uniform((64, 43, 512)),
+        training=False,
+        attention_mask=None,
+    )
     
     sample_encoder_layer_output.shape
     
@@ -201,8 +208,11 @@ if __name__ == '__main__':
         ddf=1024,
         input_vocab_size=5000, 
         max_seq_len=200)
-    sample_encoder_output = sample_encoder(tf.random.uniform((64, 120)),
-                                          False, None)
+    sample_encoder_output = sample_encoder(
+        tf.random.uniform((64, 120)),
+        training=False,
+        attention_mask=None,
+    )
     sample_encoder_output.shape
     
     
@@ -210,8 +220,12 @@ if __name__ == '__main__':
     sample_decoder_layer = DecoderLayer(d_model=512, num_heads=8, dff=2048)
     
     sample_decoder_layer_output, _, _ = sample_decoder_layer(
-        tf.random.uniform((64, 50, 512)), sample_encoder_layer_output,
-        False, None, None)
+        tf.random.uniform((64, 50, 512)),
+        sample_encoder_layer_output,
+        training=False,
+        look_ahead_mask=None,
+        padding_mask=None,
+    )
     sample_decoder_layer_output.shape
     
     
@@ -223,9 +237,13 @@ if __name__ == '__main__':
         ddf=1024,
         target_vocab_size=5000, 
         max_seq_len=200)
-    sample_decoder_output, attn = sample_decoder(tf.random.uniform((64, 100)),
-                                                sample_encoder_output, False,
-                                                None, None)
+    sample_decoder_output, attn = sample_decoder(
+        tf.random.uniform((64, 100)),
+        sample_encoder_output,
+        training=False,
+        look_ahead_mask=None,
+        padding_mask=None,
+    )
     sample_decoder_output.shape, attn['decoder_layer1_att_w1'].shape
 
 # [EOF]

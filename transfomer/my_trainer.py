@@ -13,8 +13,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from transformer import Transformer
-from self_attention import create_mask
+try:
+    from .transformer import Transformer
+    from .self_attention import create_mask
+except ImportError:
+    from transformer import Transformer
+    from self_attention import create_mask
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
     def __init__(self, d_model, warmup_steps=4000):
@@ -23,14 +27,12 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         self.warmup_steps = warmup_steps
 
     def __call__(self, step):
-        step_equal_zero = tf.equal(step, 0)
-        is_first_step = tf.reduce_all(step_equal_zero)
-        if is_first_step:
-            arg1 = np.inf
-        else:
-            arg1 = 1./np.sqrt(step)
-        arg2 = tf.cast(step, tf.float32) * (self.warmup_steps ** -1.5)
-        return self.d_model * tf.math.minimum(arg1, arg2)
+        step = tf.cast(tf.maximum(step, 1), tf.float32)
+        d_model = tf.cast(self.d_model, tf.float32)
+        warmup_steps = tf.cast(self.warmup_steps, tf.float32)
+        arg1 = tf.math.rsqrt(step)
+        arg2 = step * tf.math.pow(warmup_steps, -1.5)
+        return tf.math.rsqrt(d_model) * tf.math.minimum(arg1, arg2)
     
     def get_config(self):
         return {'d_model': self.d_model, 'warmup_steps': self.warmup_steps}
@@ -47,11 +49,14 @@ def train_step(inputs, targets):
     encode_padding_mask, combined_mask, decode_padding_mask = create_mask(inputs, tar_inp)
     
     with tf.GradientTape() as tape:
-        predictions, _ = transformer(inputs, tar_inp,
-                                    True,
-                                    encode_padding_mask,
-                                    combined_mask,
-                                    decode_padding_mask)
+        predictions, _ = transformer(
+            inputs,
+            tar_inp,
+            training=True,
+            encode_padding_mask=encode_padding_mask,
+            look_ahead_mask=combined_mask,
+            decode_padding_mask=decode_padding_mask,
+        )
         loss = loss_fun(tar_real, predictions)
     # 求梯度
     gradients = tape.gradient(loss, transformer.trainable_variables)
@@ -172,8 +177,8 @@ if __name__ == '__main__':
         start = time.time()
     
         # 重置记录项
-        train_loss.reset_states()
-        train_accuracy.reset_states()
+        train_loss.reset_state()
+        train_accuracy.reset_state()
     
         # inputs 葡萄牙语，targets英语
         for batch, (inputs, targets) in enumerate(train_dataset):
@@ -217,19 +222,21 @@ if __name__ == '__main__':
     
         for i in range(MAX_LENGTH):
             enc_padding_mask, combined_mask, dec_padding_mask = create_mask(encoder_input, output)
-            predictions, attention_weights = transformer(encoder_input, 
-                                                     output,
-                                                     False,
-                                                     enc_padding_mask,
-                                                     combined_mask,
-                                                     dec_padding_mask)
+            predictions, attention_weights = transformer(
+                encoder_input,
+                output,
+                training=False,
+                encode_padding_mask=enc_padding_mask,
+                look_ahead_mask=combined_mask,
+                decode_padding_mask=dec_padding_mask,
+            )
     
             # 从 seq_len 维度选择最后一个词
             predictions = predictions[: ,-1:, :]  # (batch_size, 1, vocab_size)
             predicted_id = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
     
             # 如果 predicted_id 等于结束标记，就返回结果
-            if predicted_id == tokenizer_en.vocab_size + 1:
+            if int(predicted_id[0, 0].numpy()) == tokenizer_en.vocab_size + 1:
                 return tf.squeeze(output, axis=0), attention_weights
     
             # 连接 predicted_id 与输出，作为解码器的输入传递到解码器。
@@ -238,8 +245,10 @@ if __name__ == '__main__':
         
     def translate(sentence, plot=''):
         result, attention_weights = evaluate(sentence)
-        predicted_sentence = tokenizer_en.decode([i for i in result 
-                                                  if i < tokenizer_en.vocab_size])  
+        result_tokens = result.numpy().tolist()
+        predicted_sentence = tokenizer_en.decode(
+            [i for i in result_tokens if i < tokenizer_en.vocab_size]
+        )
         print('输入: {}'.format(sentence))
         print('预测输出: {}'.format(predicted_sentence))
         

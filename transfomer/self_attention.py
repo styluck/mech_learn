@@ -102,39 +102,7 @@ def scale_self_attention1(q, k, v, mask):
     '''
     # query key 相乘获取匹配关系
     '''
-    
-    if mask is not None:
-        matmul_qk = tf.matmul(q, k, transpose_b=True)
-    
-        # 使用dk进行缩放
-        dk = tf.cast(tf.shape(k)[-1], tf.float32)
-        scaled_attention_logits = matmul_qk / tf.math.sqrt(dk)
-
-
-        # 掩码
-        scaled_attention_logits += (mask * -1e9)
-        # 通过softmax获取attention权重
-        
-        attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)
-    
-        # attention 乘上value
-        output = tf.matmul(attention_weights, v)  # （.., seq_len_v, depth）
-
-    else:
-        
-        matmul_qk = tf.matmul(q, k, transpose_a=True)
-
-        # 使用dk进行缩放
-        dk = tf.cast(tf.shape(k)[-1], tf.float32)
-        scaled_attention_logits = matmul_qk / tf.math.sqrt(dk)
-        # 通过softmax获取attention权重
-        
-        attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)
-    
-        # attention 乘上value
-        output = tf.matmul(v, attention_weights) # （.., seq_len_v, depth）
-
-    return output, attention_weights
+    return scale_self_attention(q, k, v, mask)
 
 
 if __name__ == '__main__':
